@@ -7,7 +7,14 @@ authors = [
     { name = "insleker", email = "bkinnightskytw@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "clip",
+    "pillow>=12.2.0",
+    "requests>=2.34.2",
+    "torch>=2.12.0",
+    "transformers>=5.9.0",
+    "ultralytics>=8.4.56",
+]
 
 [project.scripts]
 two-d-screw-hole-od = "two_d_screw_hole_od:main"
@@ -15,3 +22,22 @@ two-d-screw-hole-od = "two_d_screw_hole_od:main"
 [build-system]
 requires = ["uv_build>=0.11.7,<0.12.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.3.0",
+    "pytest>=9.0.3",
+    "pytest-html>=4.2.0",
+    "ruff>=0.12.11",
+    "ty>=0.0.1a17",
+]
+
+[tool.pytest.ini_options]
+log_cli = true
+log_cli_level = "INFO"
+markers = [
+    "model_experiment: downloads model weights and runs live object detectors",
+]
+
+[tool.uv.sources]
+clip = { git = "https://github.com/ultralytics/CLIP.git" }

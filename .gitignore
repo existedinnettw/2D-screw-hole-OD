@@ -51,6 +51,10 @@ coverage.xml
 .pytest_cache/
 cover/
 
+# Local model experiment outputs
+artifacts/
+*.pt
+
 # Translations
 *.mo
 *.pot
