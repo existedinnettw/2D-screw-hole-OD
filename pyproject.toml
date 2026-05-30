@@ -1,0 +1,17 @@
+[project]
+name = "two-d-screw-hole-od"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "insleker", email = "bkinnightskytw@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+two-d-screw-hole-od = "two_d_screw_hole_od:main"
+
+[build-system]
+requires = ["uv_build>=0.11.7,<0.12.0"]
+build-backend = "uv_build"
