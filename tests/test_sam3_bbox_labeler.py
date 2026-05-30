@@ -104,8 +104,28 @@ def test_prompt_points_to_payload_labels_positive_and_negative_points() -> None:
     )
 
     assert payload == [
-        {"x": 10.0, "y": 20.0, "label": 1, "kind": "positive"},
-        {"x": 30.5, "y": 40.5, "label": 0, "kind": "negative"},
+        {"x": 10.0, "y": 20.0, "label": 1, "kind": "positive", "group": 1},
+        {"x": 30.5, "y": 40.5, "label": 0, "kind": "negative", "group": 1},
+    ]
+
+
+def test_group_prompt_points_orders_points_by_object_group() -> None:
+    tool = load_tool_module()
+
+    grouped = tool.group_prompt_points(
+        [
+            tool.PromptPoint(x=30.0, y=40.0, label=1, group=2),
+            tool.PromptPoint(x=10.0, y=20.0, label=1, group=1),
+            tool.PromptPoint(x=35.0, y=45.0, label=0, group=2),
+        ]
+    )
+
+    assert grouped == [
+        [tool.PromptPoint(x=10.0, y=20.0, label=1, group=1)],
+        [
+            tool.PromptPoint(x=30.0, y=40.0, label=1, group=2),
+            tool.PromptPoint(x=35.0, y=45.0, label=0, group=2),
+        ],
     ]
 
 

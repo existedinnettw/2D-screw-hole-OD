@@ -68,9 +68,11 @@ available, use `--model sam2` or draw boxes manually.
 
 SAM2 does not understand the `--prompt` text. For SAM2, `--prompt` is only the
 label written to generated boxes. Use the canvas controls to switch between
-manual box mode, positive point mode, and negative point mode. When prompt
-points are present, `Run SAM2` uses them with `SAM2ImagePredictor`; without
-points, it falls back to automatic mask proposals.
+manual box mode, positive point mode, and negative point mode. Press `Next` or
+the `o` key to start point prompts for another object. When prompt points are
+present, `Run SAM2` runs each object point group with `SAM2ImagePredictor` and
+adds one bbox per group; without points, it falls back to automatic mask
+proposals.
 
 ## TODO
 
