@@ -12,9 +12,10 @@ from two_d_screw_hole_od.types import Detection, ModelResult
 
 def run_grounding_dino(
     image_path: Path,
+    *,
+    confidence: float,
+    text_threshold: float,
     prompts: tuple[str, ...] = GROUNDING_DINO_TARGET_PROMPTS,
-    confidence: float = 0.25,
-    text_threshold: float = 0.25,
     device: str | None = None,
     model_id: str = "IDEA-Research/grounding-dino-tiny",
 ) -> ModelResult:

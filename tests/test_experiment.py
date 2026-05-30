@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import json
 from pathlib import Path
 from typing import Any
@@ -7,8 +8,12 @@ from typing import Any
 import pytest
 
 from two_d_screw_hole_od.config import (
+    GROUNDING_DINO_CONFIDENCE,
     GROUNDING_DINO_TARGET_PROMPTS,
+    GROUNDING_DINO_TEXT_THRESHOLD,
     PROMPTS_BY_MODEL,
+    YOLO_WORLD_CONFIDENCE,
+    YOLO_WORLD_DIAGNOSTIC_CONFIDENCE_THRESHOLDS,
     YOLO_WORLD_DIAGNOSTIC_PROMPTS,
     YOLO_WORLD_TARGET_PROMPTS,
 )
@@ -17,10 +22,13 @@ from two_d_screw_hole_od.experiment import (
     save_report,
 )
 from two_d_screw_hole_od.models.fs_detr import fs_detr_status
+from two_d_screw_hole_od.models.grounding_dino import run_grounding_dino
+from two_d_screw_hole_od.models.yolo_world import run_yolo_world_with_diagnostics
 from two_d_screw_hole_od.types import (
     Detection,
     ExperimentReport,
     ModelResult,
+    YoloDiagnostic,
 )
 
 
@@ -38,6 +46,100 @@ def test_prompts_are_split_by_model() -> None:
     assert PROMPTS_BY_MODEL["YOLO-World"]["target"] == YOLO_WORLD_TARGET_PROMPTS
     assert PROMPTS_BY_MODEL["YOLO-World"]["diagnostic"] == YOLO_WORLD_DIAGNOSTIC_PROMPTS
     assert PROMPTS_BY_MODEL["Grounding DINO"]["target"] == GROUNDING_DINO_TARGET_PROMPTS
+
+
+def test_confidence_thresholds_are_configured_in_config() -> None:
+    assert YOLO_WORLD_CONFIDENCE == 0.001
+    assert GROUNDING_DINO_CONFIDENCE == 0.12
+    assert GROUNDING_DINO_TEXT_THRESHOLD == 0.3
+    assert YOLO_WORLD_DIAGNOSTIC_CONFIDENCE_THRESHOLDS == (0.02, 0.005, 0.001)
+
+
+def test_model_confidence_arguments_must_be_passed_explicitly() -> None:
+    yolo_parameters = inspect.signature(run_yolo_world_with_diagnostics).parameters
+    grounding_dino_parameters = inspect.signature(run_grounding_dino).parameters
+
+    assert yolo_parameters["confidence"].default is inspect.Parameter.empty
+    assert yolo_parameters["confidence"].kind is inspect.Parameter.KEYWORD_ONLY
+    assert grounding_dino_parameters["confidence"].default is inspect.Parameter.empty
+    assert (
+        grounding_dino_parameters["confidence"].kind is inspect.Parameter.KEYWORD_ONLY
+    )
+    assert (
+        grounding_dino_parameters["text_threshold"].default is inspect.Parameter.empty
+    )
+    assert (
+        grounding_dino_parameters["text_threshold"].kind
+        is inspect.Parameter.KEYWORD_ONLY
+    )
+
+
+def test_zero_shot_experiment_passes_configured_confidence_thresholds(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    captured: dict[str, float] = {}
+
+    def fake_run_yolo_world_with_diagnostics(
+        image_path: Path,
+        *,
+        prompts: tuple[str, ...],
+        confidence: float,
+        device: str | None,
+    ) -> tuple[ModelResult, list[YoloDiagnostic]]:
+        captured["yolo_confidence"] = confidence
+        return (
+            ModelResult(
+                model="YOLO-World",
+                status="ok",
+                confidence_threshold=confidence,
+                elapsed_seconds=0.1,
+                inference_seconds=0.01,
+                detections=[],
+            ),
+            [],
+        )
+
+    def fake_run_grounding_dino(
+        image_path: Path,
+        *,
+        prompts: tuple[str, ...],
+        confidence: float,
+        text_threshold: float,
+        device: str | None,
+    ) -> ModelResult:
+        captured["grounding_dino_confidence"] = confidence
+        captured["grounding_dino_text_threshold"] = text_threshold
+        return ModelResult(
+            model="Grounding DINO",
+            status="ok",
+            confidence_threshold=confidence,
+            elapsed_seconds=0.1,
+            inference_seconds=0.01,
+            detections=[],
+            text_threshold=text_threshold,
+        )
+
+    monkeypatch.setattr(
+        "two_d_screw_hole_od.experiment.run_yolo_world_with_diagnostics",
+        fake_run_yolo_world_with_diagnostics,
+    )
+    monkeypatch.setattr(
+        "two_d_screw_hole_od.experiment.run_grounding_dino",
+        fake_run_grounding_dino,
+    )
+
+    report = run_zero_shot_experiment(FIXTURE_IMAGE, output_dir=tmp_path)
+
+    assert captured == {
+        "yolo_confidence": YOLO_WORLD_CONFIDENCE,
+        "grounding_dino_confidence": GROUNDING_DINO_CONFIDENCE,
+        "grounding_dino_text_threshold": GROUNDING_DINO_TEXT_THRESHOLD,
+    }
+    assert [result.confidence_threshold for result in report.results[:2]] == [
+        YOLO_WORLD_CONFIDENCE,
+        GROUNDING_DINO_CONFIDENCE,
+    ]
 
 
 def test_save_report_writes_json(tmp_path: Path) -> None:

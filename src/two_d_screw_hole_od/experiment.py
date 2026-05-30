@@ -6,9 +6,12 @@ from dataclasses import replace
 from pathlib import Path
 
 from two_d_screw_hole_od.config import (
+    GROUNDING_DINO_CONFIDENCE,
     GROUNDING_DINO_TARGET_PROMPTS,
+    GROUNDING_DINO_TEXT_THRESHOLD,
     PROMPTS_BY_MODEL,
     TARGET_IMAGE_URL,
+    YOLO_WORLD_CONFIDENCE,
     YOLO_WORLD_TARGET_PROMPTS,
 )
 from two_d_screw_hole_od.models import (
@@ -35,14 +38,14 @@ def run_zero_shot_experiment(
     yolo_result, yolo_diagnostics = run_yolo_world_with_diagnostics(
         image_path,
         prompts=YOLO_WORLD_TARGET_PROMPTS,
-        confidence=0.001,
+        confidence=YOLO_WORLD_CONFIDENCE,
         device=device,
     )
     grounding_dino_result = run_grounding_dino(
         image_path,
         prompts=GROUNDING_DINO_TARGET_PROMPTS,
-        confidence=0.12,
-        text_threshold=0.3,
+        confidence=GROUNDING_DINO_CONFIDENCE,
+        text_threshold=GROUNDING_DINO_TEXT_THRESHOLD,
         device=device,
     )
     fs_detr_result = fs_detr_status(

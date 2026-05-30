@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from two_d_screw_hole_od.config import (
+    YOLO_WORLD_DIAGNOSTIC_CONFIDENCE_THRESHOLDS,
     YOLO_WORLD_DIAGNOSTIC_PROMPTS,
     YOLO_WORLD_TARGET_PROMPTS,
 )
@@ -48,8 +49,9 @@ class YoloWorldDetector:
 
 def run_yolo_world(
     image_path: Path,
+    *,
+    confidence: float,
     prompts: tuple[str, ...] = YOLO_WORLD_TARGET_PROMPTS,
-    confidence: float = 0.02,
     device: str | None = None,
     model_name: str = "yolov8s-world.pt",
     detector: YoloWorldDetector | None = None,
@@ -90,13 +92,14 @@ def run_yolo_world(
 
 def run_yolo_world_with_diagnostics(
     image_path: Path,
+    *,
+    confidence: float,
     prompts: tuple[str, ...] = YOLO_WORLD_TARGET_PROMPTS,
-    confidence: float = 0.02,
     device: str | None = None,
     model_name: str = "yolov8s-world.pt",
 ) -> tuple[ModelResult, list[YoloDiagnostic]]:
     detector = YoloWorldDetector(model_name)
-    diagnostic_thresholds = (0.02, 0.005, 0.001)
+    diagnostic_thresholds = YOLO_WORLD_DIAGNOSTIC_CONFIDENCE_THRESHOLDS
     lowest_target_confidence = min(confidence, *diagnostic_thresholds)
     combined_prompts = _combined_prompts(prompts, YOLO_WORLD_DIAGNOSTIC_PROMPTS)
     started_at = time.perf_counter()
@@ -149,7 +152,7 @@ def diagnose_yolo_world(
     device: str | None = None,
     model_name: str = "yolov8s-world.pt",
 ) -> list[YoloDiagnostic]:
-    thresholds = (0.02, 0.005, 0.001)
+    thresholds = YOLO_WORLD_DIAGNOSTIC_CONFIDENCE_THRESHOLDS
     combined_prompts = _combined_prompts(
         YOLO_WORLD_TARGET_PROMPTS,
         YOLO_WORLD_DIAGNOSTIC_PROMPTS,

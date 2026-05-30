@@ -33,10 +33,12 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
+# pytest.ini
+render_collapsed = false
 log_cli = true
 log_cli_level = "INFO"
 markers = [
-    "model_experiment: downloads model weights and runs live object detectors",
+    "model_experiment: downloads model weights and runs live object detectors"
 ]
 
 [tool.uv.sources]
