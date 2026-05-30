@@ -1,0 +1,29 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: Ruff format check
+        entry: uv
+        language: system
+        args: [run, ruff, format, --check, src/, tests/]
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+
+      - id: uvx-ruff-lint
+        name: Ruff lint
+        entry: uv
+        language: system
+        args: [run, ruff, check, src/, tests/]
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+
+      - id: ty-check
+        name: Ty type check
+        entry: uv
+        language: system
+        args: [run, ty, check, src/]
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]

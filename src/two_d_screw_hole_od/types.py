@@ -9,6 +9,7 @@ class Detection:
     label: str
     confidence: float
     box_xyxy: tuple[float, float, float, float]
+    text_match: float | None = None
 
 
 @dataclass(frozen=True)
@@ -19,6 +20,7 @@ class ModelResult:
     elapsed_seconds: float | None
     inference_seconds: float | None
     detections: list[Detection]
+    text_threshold: float | None = None
     notes: str = ""
     annotated_image: str | None = None
 
@@ -34,7 +36,7 @@ class YoloDiagnostic:
 @dataclass(frozen=True)
 class ExperimentReport:
     image_url: str
-    prompts: tuple[str, ...]
+    prompts_by_model: dict[str, dict[str, tuple[str, ...]]]
     results: list[ModelResult]
     yolo_diagnostics: list[YoloDiagnostic]
 

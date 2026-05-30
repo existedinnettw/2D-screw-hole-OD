@@ -4,29 +4,53 @@ from pathlib import Path
 
 import requests
 
-
 TARGET_IMAGE_URL = (
     "https://media.printables.com/media/prints/304678/images/"
     "2657447_21c90dd4-e7f2-415d-b8ff-c7336b9b4f1a/thumbs/inside/"
     "1600x1200/jpg/2022-10-27-222638.webp"
 )
 
-PROMPTS = (
+YOLO_WORLD_TARGET_PROMPTS = (
     "screw hole",
-    "circular hole",
-    "round hole",
-    "counterbore screw hole",
+    "screw hole without screw",
+    "screw",
+    "a circular screw hole",
+    # "screw hole with screw",
+    # "circular hole",
+    # "round hole",
+    # "counterbore screw hole",
 )
 
 YOLO_WORLD_DIAGNOSTIC_PROMPTS = (
-    "hole",
-    "screw",
-    "circle",
-    "opening",
-    "black circle",
-    "round opening",
+    # "hole",
+    # "screw",
+    # "circle",
+    # "opening",
+    # "black circle",
+    # "round opening",
     "screw holes",
 )
+
+GROUNDING_DINO_TARGET_PROMPTS = (
+    "a circular screw hole",
+    "a circular screw hole without screw",
+    # "screw hole for fixing board",
+    # "screw",
+)
+
+FS_DETR_SUPPORT_PROMPTS: tuple[str, ...] = ()
+
+PROMPTS_BY_MODEL: dict[str, dict[str, tuple[str, ...]]] = {
+    "YOLO-World": {
+        "target": YOLO_WORLD_TARGET_PROMPTS,
+        "diagnostic": YOLO_WORLD_DIAGNOSTIC_PROMPTS,
+    },
+    "Grounding DINO": {"target": GROUNDING_DINO_TARGET_PROMPTS},
+    "FS-DETR": {"support": FS_DETR_SUPPORT_PROMPTS},
+}
+
+# Backwards-compatible alias for existing prompt-focused tests and callers.
+PROMPTS = GROUNDING_DINO_TARGET_PROMPTS
 
 
 def download_target_image(path: Path, url: str = TARGET_IMAGE_URL) -> Path:
